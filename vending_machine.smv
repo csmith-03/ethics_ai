@@ -1,0 +1,63 @@
+MODULE vending_machine_css.smv
+
+  VAR
+    inserted_currency: 0..100; --amount of currency inserted
+    selected_product: 0..2; --selected product (0 = product 1, 1 = product 2, 2 = product 3)
+    product_price: array 0..2 of 0..25; --price of each product (0 = product 1, 1 = product 2, 2 = product 3)
+    product_dispensed: boolean; --whether a product has been dispensed
+    change_dispensed: boolean; --whether change has been dispensed
+    change_amount: 0..100; --amount of change to dispense
+
+ ASSIGN
+    --Set initial values
+    init(inserted_currency) := 0;
+    init(selected_product) := 0;
+    init(product_price[0]) := 5;
+    init(product_price[1]) := 10;
+    init(product_price[2]) := 25;
+    init(product_dispensed) := FALSE;
+    init(change_dispensed) := FALSE;
+
+ TRANS
+    --Insert currency
+    case
+      --User inserts 5 cents
+      inserted_currency < 100 & selected_product < 3 & !product_dispensed & !change_dispensed : {inserted_currency = inserted_currency + 5};
+      --User inserts 10 cents
+      inserted_currency < 100 & selected_product < 3 & !product_dispensed & !change_dispensed : {inserted_currency = inserted_currency + 10};
+      --User inserts 25 cents
+      inserted_currency < 100 & selected_product < 3 & !product_dispensed & !change_dispensed : {inserted_currency = inserted_currency + 25};
+    esac;
+  
+TRANS
+    --Select product
+    case
+      --User selects product 1
+      selected_product < 3 & inserted_currency >= product_price[0] & !product_dispensed & !change_dispensed : {selected_product = 0};
+      --User selects product 2
+      selected_product < 3 & inserted_currency >= product_price[1] & !product_dispensed & !change_dispensed : {selected_product = 1};
+	  --User selects product 3
+      selected_product < 3 & inserted_currency >= product_price[2] & !product_dispensed & !change_dispensed : {selected_product = 2};
+
+
+TRANS
+    --Dispense change
+    case
+      --Too much currency for product 1
+      selected_product = 0 & inserted_currency > product_price[0] & !product_dispensed & !change_dispensed : {change_amount = inserted_currency -$
+      --Too much currency for product 2
+      selected_product = 1 & inserted_currency > product_price[1] & !product_dispensed & !change_dispensed : {change_amount = inserted_currency -$
+      --Too much currency for product 3
+      selected_product = 2 & inserted_currency > product_price[2] & !product_dispensed & !change_dispensed : {change_amount = inserted_currency -$
+    esac;
+
+TRANS
+    --Dispense product
+    case
+      --Product 1 is dispensed
+      selected_product = 0 & inserted_currency >= product_price[0] & !product_dispensed & !change_dispensed : {product_dispensed = TRUE};
+      --Product 2 is dispensed
+      selected_product = 0 & inserted_currency >= product_price[1] & !product_dispensed & !change_dispensed : {product_dispensed = TRUE};
+      --Product 3 is dispensed
+      selected_product = 2 & inserted_currency >= product_price[2] & !product_dispensed & !change_dispensed : {product_dispensed = TRUE};
+    esac;
