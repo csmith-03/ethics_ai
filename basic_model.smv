@@ -1,0 +1,42 @@
+MODULE main 
+VAR 
+-- States representing combinations of obligations and permissible actions for 5 actions (a_1 through a_5)
+    s : {Oa1Pa1, Oa1Pa2, Oa1Pa3, Oa1Pa4, Oa1Pa5,
+         Oa2Pa1, Oa2Pa2, Oa2Pa3, Oa2Pa4, Oa2Pa5,
+         Oa3Pa1, Oa3Pa2, Oa3Pa3, Oa3Pa4, Oa3Pa5,
+         Oa4Pa1, Oa4Pa2, Oa4Pa3, Oa4Pa4, Oa4Pa5,
+         Oa5Pa1, Oa5Pa2, Oa5Pa3, Oa5Pa4, Oa5Pa5};
+
+ASSIGN
+    -- Set the initial state 's' to the combination Oa1Pa1
+    init(s) := Oa1Pa1;
+
+    -- defines the state transitions for variable 's'
+    next(s) :=
+        case 
+            s = Oa1Pa1 : Oa1Pa2;
+            s = Oa1Pa2 : Oa1Pa3;
+            s = Oa1Pa3 : Oa1Pa4;
+            s = Oa1Pa4 : Oa1Pa5;
+            s = Oa1Pa5 : Oa2Pa1;
+            s = Oa2Pa1 : Oa2Pa2;
+            s = Oa2Pa2 : Oa2Pa3;
+            s = Oa2Pa3 : Oa2Pa4;
+            s = Oa2Pa4 : Oa2Pa5;
+            s = Oa2Pa5 : Oa3Pa1;
+            s = Oa3Pa1 : Oa3Pa2;
+            s = Oa3Pa2 : Oa3Pa3;
+            s = Oa3Pa3 : Oa3Pa4;
+            s = Oa3Pa4 : Oa3Pa5;
+            s = Oa3Pa5 : Oa4Pa1;
+            s = Oa4Pa1 : Oa4Pa2;
+            s = Oa4Pa2 : Oa4Pa3;
+            s = Oa4Pa3 : Oa4Pa4;
+            s = Oa4Pa4 : Oa4Pa5;
+            s = Oa4Pa5 : Oa5Pa1;
+            s = Oa5Pa1 : Oa5Pa2;
+            s = Oa5Pa2 : Oa5Pa3;
+            s = Oa5Pa3 : Oa5Pa4;
+            s = Oa5Pa4 : Oa5Pa5;
+            s = Oa5Pa5 : Oa1Pa1; -- a transition from Oa5Pa5 back to Oa1Pa1 to complete the cycle
+        esac;
