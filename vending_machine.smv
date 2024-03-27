@@ -1,0 +1,39 @@
+MODULE main
+VAR
+  product: {P1, P2, P3}; --products in the vending machine
+  currency: {5, 10, 20}; --currency accepted
+  change: {0, 5, 10, 15}; --dispensed change
+ASSIGN
+  init(product) := P1; --P1 is the initial product
+  init(currency) := 5; --initial currency 
+  init(change) := 0; --initial change
+
+VAR
+  state_0 : boolean; --0
+  state_1 : boolean; --5
+  state_2 : boolean; --10
+  state_3 : boolean; --20
+
+-- Actions of the vending machine
+select_1: boolean; --P1 is selected
+select_2: boolean; --P2 is selected
+select_3: boolean; --P3 is selected
+
+INIT
+  state_0 & !state_1 != FALSE &
+  state_2 = FALSE &
+  state_3 = FALSE & 
+  currency = 0;
+
+TRANS -- go from state_3 to selecting product
+  state_3 & select_1 | select_2 | select_3 ->
+  next(state_3) = FALSE &
+  next(product) = select_1 | select_2 | select_3;
+
+TRANS -- go from selecting product to dispersing change
+  select_1 | select_2 | select_3 & change = 0 | 5 | 10 | 15 ->
+  next(select_1) = FALSE &
+  next(select_2) = FALSE &
+  next(select_3) = FALSE &
+  next(change) = 0 | 5 | 10 | 15;
+

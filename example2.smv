@@ -1,0 +1,50 @@
+MODULE main
+  VAR
+    intruder_detected : boolean;  -- Intruder detected variable
+    attempted_turn_right : boolean;  -- Attempted turn right variable
+    attempted_turn_left : boolean;  -- Attempted turn left variable
+    attempted_return_to_base : boolean;  -- Attempted return to base variable
+    flight_phase : {cruise, eAvoid};  -- Flight phase variable
+
+  ASSIGN
+    -- initialize the different states
+    init(intruder_detected) := FALSE;  -- no intruder detected initially
+    init(attempted_turn_right) := FALSE;  -- no attempted turn right initially
+    init(attempted_turn_left) := FALSE;  -- no attempted turn left initially
+    init(attempted_return_to_base) := FALSE;  -- no attempted return to base initially
+    init(flight_phase) := cruise;  -- initial flight phase is cruise
+
+-- STATE 1
+  -- When intruder is detected, change flight phase to eAvoid
+  next(flight_phase) :=
+    case
+      intruder_detected : eAvoid;
+      TRUE : flight_phase;
+    esac;
+
+-- STATE 2
+  -- Attempting to turn right plan
+  next(attempted_turn_right) :=
+    case
+      flight_phase = eAvoid & !attempted_turn_right : TRUE;
+      TRUE : attempted_turn_right;
+    esac;
+
+-- STATE 3
+  -- Attempting to turn left plan
+  next(attempted_turn_left) :=
+    case
+      flight_phase = eAvoid & attempted_turn_right & !attempted_turn_left : TRUE;
+      TRUE : attempted_turn_left;
+    esac;
+
+-- STATE 4
+  -- Attempting to return to base plan
+  next(attempted_return_to_base) :=
+    case
+      flight_phase = eAvoid & attempted_turn_right & attempted_turn_left & !attempted_return_to_base : TRUE;
+      TRUE : attempted_return_to_base;
+    esac;
+
+  DEFINE
+    ethical_plan_triggered := attempted_turn_right & attempted_turn_left & attempted_return_to_base;  -- Ethical planner is triggered when all plans fail

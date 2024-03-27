@@ -1,0 +1,54 @@
+MODULE main
+  VAR
+    fuel_low_alert : boolean;  -- Fuel low alert variable
+    safe_landing_site_found : boolean;  -- Safe landing site found variable
+    ethical_planner_invoked : boolean;  -- Ethical planner invoked variable
+    option_chosen : 1..3;  -- Chosen option by the agent
+
+  ASSIGN
+    -- initialize the different states
+    init(fuel_low_alert) := FALSE;  -- no fuel low alert initially
+    init(safe_landing_site_found) := FALSE;  -- safe landing site not found initially
+    init(ethical_planner_invoked) := FALSE;  -- ethical planner not invoked initially
+    init(option_chosen) := 1;  -- initial option chosen by the agent
+----------------------------
+  -- STATE 1: Fuel low alert
+  -- If the ethical planner has not been invoked 
+  -- and a safe landing site has not been found, 
+  -- then a fuel low alert occurs.
+  next(fuel_low_alert) :=
+    case
+      !ethical_planner_invoked & !safe_landing_site_found : TRUE;  -- fuel low alert occurs if ethical planner not invoked and safe landing site not found
+      TRUE : fuel_low_alert;  -- otherwise, fuel_low_alert state remains unchanged
+    esac;
+----------------------------
+  -- STATE 2: Safe landing site found
+-- If a fuel low alert occurs, 
+-- then a safe landing site is considered to be found.
+
+  next(safe_landing_site_found) :=
+    case
+      fuel_low_alert : TRUE;  -- safe landing site found if fuel low alert occurs
+      TRUE : safe_landing_site_found;  -- otherwise, safe_landing_site_found state remains unchanged
+    esac;
+----------------------------
+  -- STATE 3: Ethical planner invoked
+  -- If a fuel low alert occurs 
+  -- and a safe landing site has not been found, 
+  -- then the ethical planner is invoked.
+  next(ethical_planner_invoked) :=
+    case
+      fuel_low_alert & !safe_landing_site_found : TRUE;  -- ethical planner is invoked if fuel low alert occurs and safe landing site not found
+      TRUE : ethical_planner_invoked;  -- otherwise, ethical_planner_invoked state remains unchanged
+    esac;
+----------------------------
+  -- STATE 4: Option chosen
+  -- If the ethical planner is invoked, the agent can choose any option.
+  next(option_chosen) :=
+    case
+      ethical_planner_invoked : {1, 2, 3};  -- agent can choose any option if ethical planner is invoked
+      TRUE : option_chosen;  -- otherwise, option_chosen state remains unchanged
+    esac;
+
+  DEFINE
+    most_ethical_option := (option_chosen = 3);  -- Define most ethical option chosen by the agent
