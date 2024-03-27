@@ -1,0 +1,62 @@
+MODULE main
+  VAR
+    aircraft_movement: {turn_right, move_forward, stop, take_off};  -- Variable for current movement of the aircraft
+    distance: {d_0, d_50, d_100, d_150, d_250};  -- Variable for distance covered by the aircraft
+    obstacles: boolean_array[1..MAX_OBSTACLES];  -- Variable for obstacles 
+
+    MAX_OBSTACLES: 15;  -- Maximum number of obstacles
+
+  ASSIGN
+    init(aircraft_movement) := stop;  -- Initialize the aircraft movement to stop
+    init(distance) := d_0;  -- Initialize the distance covered by the aircraft to zero
+
+  TRANS
+    -- First sequence: (stop,d_0) -> (move_forward,d_0) -> (move_forward,d_50) -> (move_forward,d_100,obst_1)
+
+    aircraft_movement = stop & distance = d_0 ->
+      next(aircraft_movement) = move_forward & next(distance) = d_0;
+
+    aircraft_movement = move_forward & distance = d_0 ->
+      next(aircraft_movement) = move_forward & next(distance) = d_50;
+
+    aircraft_movement = move_forward & distance = d_50 ->
+      next(aircraft_movement) = {move_forward & next(distance) = d_100 & !obstacles[1],
+                                 turn_right & next(distance) = d_50};  -- Choice here!!!!
+
+    aircraft_movement = move_forward & distance = d_100 & !obstacles[1] ->
+      next(aircraft_movement) = stop;  -- stops if obstacle is encountered
+
+    aircraft_movement = turn_right & distance = d_50 ->
+      next(aircraft_movement) = move_forward & next(distance) = d_150;
+
+    aircraft_movement = move_forward & distance = d_150 ->
+      next(aircraft_movement) = {move_forward & next(distance) = d_250 & !obstacles[2],
+                                 turn_right & next(distance) = d_50};  -- Choice here!!!!
+
+    aircraft_movement = move_forward & distance = d_250 & !obstacles[1] ->
+      next(aircraft_movement) = stop;  -- stops if there is an obstacle
+
+    aircraft_movement = turn_right & distance = d_50 ->
+      next(aircraft_movement) = move_forward & next(distance) = d_250;
+
+    aircraft_movement = move_forward & distance = d_250 ->
+      next(aircraft_movement) = take_off;
+
+    -- Aircraft is in take-off mode, stays in take-off mode
+    aircraft_movement = take_off ->
+      next(aircraft_movement) = take_off;
+
+  INVAR
+    -- ensures the aircraft does not go past the runway end
+    distance != d_300;
+CTLSPEC
+  EF(aircraft_movement = take_off);
+
+CTLSPEC
+  AG(aircraft_movement = move_forward | aircraft_movement = stop);
+
+CTLSPEC
+  AG(aircraft_movement = stop);
+
+CTLSPEC
+  AF(distance = d_500);

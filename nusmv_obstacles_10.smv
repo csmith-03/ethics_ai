@@ -1,0 +1,99 @@
+MODULE main
+VAR
+  aircraft_movement: {turn_right, move_forward, stop, take_off};
+  distance: {d_0, d_50, d_100, d_150, d_200, d_250, d_300, d_350, d_400, d_450, d_500, d_550, d_600, d_650, d_700, d_750, d_800, d_850, d_900, d_950, d_1000};
+  obstacles: {none, obst_1, obst_2, obst_3, obst_4, obst_5, obst_6, obst_7, obst_8, obst_9, obst_10};
+
+ASSIGN
+  init(aircraft_movement) := stop;
+  init(distance) := d_0;
+  init(obstacles) := none;
+  
+  next(aircraft_movement) :=
+  case
+    aircraft_movement = stop & distance = d_0 : move_forward;
+    aircraft_movement = move_forward & distance = d_50 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_150 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_250 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_350 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_450 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_550 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_650 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_750 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_850 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_950 : {move_forward, turn_right};
+    aircraft_movement = move_forward & distance = d_100 & obstacles = obst_1: stop;
+    aircraft_movement = move_forward & distance = d_200 & obstacles = obst_2: stop;
+    aircraft_movement = move_forward & distance = d_300 & obstacles = obst_3: stop;
+    aircraft_movement = move_forward & distance = d_400 & obstacles = obst_4: stop;
+    aircraft_movement = move_forward & distance = d_500 & obstacles = obst_5: stop;
+    aircraft_movement = move_forward & distance = d_600 & obstacles = obst_6: stop;
+    aircraft_movement = move_forward & distance = d_700 & obstacles = obst_7: stop;
+    aircraft_movement = move_forward & distance = d_800 & obstacles = obst_8: stop;
+    aircraft_movement = move_forward & distance = d_900 & obstacles = obst_9: stop;
+    aircraft_movement = turn_right : move_forward;
+    aircraft_movement = move_forward & distance = d_1000 & obstacles != obst_10: take_off;
+    aircraft_movement = take_off : take_off;
+    TRUE : aircraft_movement;
+  esac;
+
+  next(distance) :=
+  case
+    aircraft_movement = move_forward & distance = d_0 : d_50;
+    aircraft_movement = move_forward & distance = d_50 : d_100;
+    aircraft_movement = move_forward & distance = d_100 : d_150;
+    aircraft_movement = move_forward & distance = d_150 : d_200;
+    aircraft_movement = move_forward & distance = d_200 : d_250;
+    aircraft_movement = move_forward & distance = d_250 : d_300;
+    aircraft_movement = move_forward & distance = d_300 : d_350;
+    aircraft_movement = move_forward & distance = d_350 : d_400;
+    aircraft_movement = move_forward & distance = d_400 : d_450;
+    aircraft_movement = move_forward & distance = d_450 : d_500;
+    aircraft_movement = move_forward & distance = d_500 : d_550;
+    aircraft_movement = move_forward & distance = d_550 : d_600;
+    aircraft_movement = move_forward & distance = d_600 : d_650;
+    aircraft_movement = move_forward & distance = d_650 : d_700;
+    aircraft_movement = move_forward & distance = d_700 : d_750;
+    aircraft_movement = move_forward & distance = d_750 : d_800;
+    aircraft_movement = move_forward & distance = d_800 : d_850;
+    aircraft_movement = move_forward & distance = d_850 : d_900;
+    aircraft_movement = move_forward & distance = d_900 : d_950;
+    aircraft_movement = move_forward & distance = d_950 : d_1000;
+    aircraft_movement = turn_right & distance = d_50 : d_100;
+    aircraft_movement = turn_right & distance = d_150 : d_200;
+    aircraft_movement = turn_right & distance = d_250 : d_300;
+    aircraft_movement = turn_right & distance = d_350 : d_400;
+    aircraft_movement = turn_right & distance = d_450 : d_500;
+    aircraft_movement = turn_right & distance = d_550 : d_600;
+    aircraft_movement = turn_right & distance = d_650 : d_700;
+    aircraft_movement = turn_right & distance = d_750 : d_800;
+    aircraft_movement = turn_right & distance = d_850 : d_900;
+    aircraft_movement = turn_right & distance = d_950 : d_1000;
+    TRUE : distance;
+  esac;
+
+next(obstacles) :=
+  case
+    aircraft_movement = move_forward & distance = d_100 : obst_1;
+    aircraft_movement = move_forward & distance = d_200 : obst_2;
+    aircraft_movement = move_forward & distance = d_300 : obst_3;
+    aircraft_movement = move_forward & distance = d_400 : obst_4;
+    aircraft_movement = move_forward & distance = d_500 : obst_5;
+    aircraft_movement = move_forward & distance = d_600 : obst_6;
+    aircraft_movement = move_forward & distance = d_700 : obst_7;
+    aircraft_movement = move_forward & distance = d_800 : obst_8;
+    aircraft_movement = move_forward & distance = d_900 : obst_9;
+    TRUE : obstacles;
+  esac;
+    
+CTLSPEC
+  EF(aircraft_movement = take_off);
+
+CTLSPEC
+  EG(aircraft_movement = move_forward | aircraft_movement = stop | aircraft_movement = turn_right | aircraft_movement = take_off);
+
+CTLSPEC
+  EF(aircraft_movement = stop);
+
+CTLSPEC
+  EF(distance = d_50);

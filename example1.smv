@@ -1,0 +1,34 @@
+MODULE main
+  VAR
+    brake_failure : boolean;  -- brake failure variable
+    lined_up : boolean;       -- lined up on runway variable
+    takeoff_ready : boolean;  -- ready for takeoff variable
+
+  ASSIGN
+  -- inititalize the different states 
+    init(brake_failure) := FALSE;  -- no brake failure
+    init(lined_up) := FALSE;        -- not lined up
+    init(takeoff_ready) := FALSE;   -- not ready for takeoff
+
+-- STATE 1: brake failure
+    next(brake_failure) :=
+      case
+        takeoff_ready : FALSE;  -- brake failure is only possible before takeoff - cannot be take off ready if there is brake failure
+        TRUE : brake_failure;   -- otherwise, brake failure state remains unchanged
+      esac;
+-- STATE 2: lined up
+    next(lined_up) :=
+      case
+        !lined_up & !brake_failure : TRUE;  -- lines up if not already and no brake failure
+        TRUE & brake_failure : FALSE;       -- cannot line up if there is brake failure 
+        TRUE : lined_up;                     -- otherwise, lined_up state remains unchanged
+      esac;
+-- STATE 3: takeoff ready
+    next(takeoff_ready) :=
+      case
+        lined_up & !brake_failure : TRUE;  -- ready for takeoff if lined up and no brake failure
+        TRUE : takeoff_ready;              -- otherwise, takeoff_ready state remains unchanged
+      esac;
+
+  DEFINE
+    safe_to_takeoff := !brake_failure & lined_up & takeoff_ready;  -- safely take off

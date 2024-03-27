@@ -1,0 +1,95 @@
+MODULE main
+VAR
+  aircraft_movement: {turn_right, move_forward, stop, take_off};  -- Variable for current movement of the aircraft
+  distance: {d_0, d_50, d_100, d_150, d_250};  -- Variable for distance covered by the aircraft
+  obstacles: {none, obst_1, obst_2};  -- Variable for obstacles 
+
+ASSIGN
+  init(aircraft_movement) := stop;  -- Initialize the aircraft movement to stop
+  init(distance) := d_0;  -- Initialize the distance covered by the aircraft to zero
+  init(obstacles) := none;  -- Assuming 'obst_1' is present initially
+  
+
+  -- Define next state of the aircraft movement variable
+  next(aircraft_movement) :=
+  case
+    -- If the aircraft is stopped at distance d_0, it moves forward
+    aircraft_movement = stop & distance = d_0 : move_forward;
+    
+    -- If the aircraft is moving forward at distance d_50, it has the option to turn right
+    aircraft_movement = move_forward & distance = d_50 : {move_forward, turn_right}; -- Option to turn right at d_50
+    
+    -- If the aircraft encounters obstacle obst_1 at distance d_100, it stops - & obstacles = obst_1
+    aircraft_movement = move_forward & distance = d_100 & obstacles = obst_1: stop;
+
+    -- If the aircraft reaches d_150 without obstacle, it turns right
+    aircraft_movement = turn_right & distance = d_50 : {move_forward, turn_right}; 
+
+    -- If the aircraft reaches d_50 without obstacle or turns right from d_50, it continues moving forward
+    aircraft_movement = move_forward & distance = d_150 : move_forward;
+
+    aircraft_movement = move_forward & distance = d_250 & obstacles = obst_2 : stop;
+    aircraft_movement = turn_right & distance = d_50 : move_forward;
+    
+
+    -- If the aircraft reaches d_250, it takes off
+    aircraft_movement = move_forward & distance = d_250 & obstacles != obst_2: take_off;
+
+    -- If the aircraft is already in take-off mode, it remains in take-off mode
+    aircraft_movement = take_off : take_off;
+
+    -- For all other cases, maintains the current state of aircraft_movement
+    TRUE : aircraft_movement;
+  esac;
+
+  -- Define next state of the distance variable
+  next(distance) :=
+    case
+      -- If the aircraft moves forward from d_0, it covers d_50 distance
+      aircraft_movement = move_forward & distance = d_0 : d_50;
+
+      -- If the aircraft moves forward from d_50, it covers d_100 distance
+      aircraft_movement = move_forward & distance = d_50 : d_150;
+
+      aircraft_movement = move_forward & distance = d_100 : d_150;
+
+      aircraft_movement = turn_right & distance = d_100 : d_100;
+
+      aircraft_movement = turn_right & distance = d_150 : d_150;
+
+
+      -- If the aircraft turns right from d_50, it covers d_150 distance
+      aircraft_movement = turn_right & distance = d_50 : d_50;
+
+      -- If the aircraft moves forward from d_150, it covers d_250 distance
+      aircraft_movement = move_forward & distance = d_150 : d_250;
+      
+      -- For all other cases, maintains the current state of distance
+      TRUE : distance;
+
+    esac;
+
+-- Define next state for obstacles
+next(obstacles) :=
+  case
+    -- If the aircraft encounters obstacle obst_1 at distance d_100 and is in move_forward mode, obstacle state changes to obst_1
+    aircraft_movement = move_forward & distance = d_100 : obst_1;
+
+    -- If the aircraft encounters obstacle obst_2 at distance d_50 and is in move_forward mode, obstacle state changes to obst_2
+    aircraft_movement = move_forward & distance = d_250 : obst_2;
+
+    -- If none of the above conditions are met, obstacle state remains the same
+    TRUE : obstacles;
+  esac;
+    
+CTLSPEC
+  EF(aircraft_movement = take_off);
+
+CTLSPEC
+  EG(aircraft_movement = move_forward | aircraft_movement = stop | aircraft_movement = turn_right | aircraft_movement = take_off);
+
+CTLSPEC
+  EF(aircraft_movement = stop);
+
+CTLSPEC
+  EF(distance = d_50);
